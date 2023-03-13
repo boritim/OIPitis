@@ -3,52 +3,50 @@ import webbrowser
 import requests
 import time
 
-# webbrowser.open_new('https://oauth.vk.com/authorize?client_id=51578672&display=page&redirect_uri=https://oauth.vk.com/blank.html&response_type=token&v=5.131&state=123456')
 
-# https://oauth.vk.com/blank.html#access_token=vk1.a.c7pdj0HD2M_K43snGEaNgobJyNPnaO6q2lEQzzFJSP_5jmDYe6MOloNcaB7C2vNDN-FtMKrGT13Fcom9eIdSltTMMVXRPVMQNXzn7mMz9zPwjfnF5Z-27_ezsJjIcVzfWss9dGSSVOTFNGMkbvTVILl7hx8XH4kSKjGowaaRYWNVkrCJnJzkAeq08JACiq11&expires_in=86400&user_id=89207761&state=123456
-
-def take_2000_posts():
-    token = "vk1.a.c7pdj0HD2M_K43snGEaNgobJyNPnaO6q2lEQzzFJSP_5jmDYe6MOloNcaB7C2vNDN-FtMKrGT13Fcom9eIdSltTMMVXRPVMQNXzn7mMz9zPwjfnF5Z-27_ezsJjIcVzfWss9dGSSVOTFNGMkbvTVILl7hx8XH4kSKjGowaaRYWNVkrCJnJzkAeq08JACiq11"
+def take_2000_posts(token, domain):
+    token = token
     version = 5.131
-    domain = 'jumoreski'
+    domain = domain
     count = 100
     offset = 0
-    all_posts = []
+    file = open(f'{domain}.csv', 'w+', encoding="utf-16")
+    all_posts = csv.writer(file)
+    all_posts.writerow(['text'])
 
     while offset < 2000:
         response = requests.get('https://api.vk.com/method/wall.get',
-                        params={
-                            'access_token': token,
-                            'v': version,
-                            'domain': domain,
-                            'count': count,
-                            'offset': offset
-                        }
-                        )
-        data = response.json()['response']['items']
+                                params={
+                                    'access_token': token,
+                                    'v': version,
+                                    'domain': domain,
+                                    'count': count,
+                                    'offset': offset
+                                }
+                                )
+        try:
+            data = response.json()['response']['items']
 
-        for item in data:
-            if item['text'] != '':
-                all_posts.append(item)
-                offset += 1
-                
+            for item in data:
+                if item['text'] != '':
+                    all_posts.writerow([item['text']])
+                    # all_posts.writerow('-----')
+                    offset += 1
+
+        except Exception as exception:
+            print('Something Went Wrong (Check Domain or API Key)')
+            raise Exception(exception)
+
         time.sleep(0.5)
-    return all_posts
 
-def file_writer(all_posts):
-    with open('jumoreski.csv', 'w') as file:
-        a_pen = csv.writer(file)
-        a_pen.writerow(['text'])
-        for post in all_posts:
-            if (post['text']) != "":
-                a_pen.writerow([post['text']])
-                a_pen.writerow(['-----'])
-
+    file.close()
 
 
 if __name__ == '__main__':
-    all_posts = take_2000_posts()
-    file_writer(all_posts)
+    try:
+        DOMAIN = 'jumoreski'
+        TOKEN = "vk1.a.c7pdj0HD2M_K43snGEaNgobJyNPnaO6q2lEQzzFJSP_5jmDYe6MOloNcaB7C2vNDN-FtMKrGT13Fcom9eIdSltTMMVXRPVMQNXzn7mMz9zPwjfnF5Z-27_ezsJjIcVzfWss9dGSSVOTFNGMkbvTVILl7hx8XH4kSKjGowaaRYWNVkrCJnJzkAeq08JACiq11"
+        take_2000_posts(TOKEN, DOMAIN)
 
-
-
+    except Exception as e:
+        print(f'Got an exception: {e}')
