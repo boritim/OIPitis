@@ -15,7 +15,7 @@ def take_2000_posts():
     offset = 0
     all_posts = []
 
-    while offset < 100:
+    while offset < 2000:
         response = requests.get('https://api.vk.com/method/wall.get',
                         params={
                             'access_token': token,
@@ -26,9 +26,12 @@ def take_2000_posts():
                         }
                         )
         data = response.json()['response']['items']
-        offset += 100
 
-        all_posts.extend(data)
+        for item in data:
+            if item['text'] != '':
+                all_posts.append(item)
+                offset += 1
+                
         time.sleep(0.5)
     return all_posts
 
