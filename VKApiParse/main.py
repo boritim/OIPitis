@@ -2,6 +2,7 @@ import csv
 import webbrowser
 import requests
 import time
+import datetime
 
 
 def take_2000_posts(token, domain):
@@ -10,9 +11,9 @@ def take_2000_posts(token, domain):
     domain = domain
     count = 100
     offset = 0
-    file = open(f'{domain}.csv', 'w+', encoding="utf-16")
+    file = open(f'{domain}.csv', 'w+', encoding="utf-8")
     all_posts = csv.writer(file)
-    all_posts.writerow(['text'])
+    all_posts.writerow(['date', 'text'])
 
     while offset < 2000:
         response = requests.get('https://api.vk.com/method/wall.get',
@@ -29,8 +30,8 @@ def take_2000_posts(token, domain):
 
             for item in data:
                 if item['text'] != '':
-                    all_posts.writerow([item['text']])
-                    # all_posts.writerow('-----')
+                    formatted_date = datetime.datetime.fromtimestamp(item['date']).strftime('%Y-%m-%d')
+                    all_posts.writerow([formatted_date, item['text']])
                     offset += 1
 
         except Exception as exception:
@@ -44,8 +45,8 @@ def take_2000_posts(token, domain):
 
 if __name__ == '__main__':
     try:
-        DOMAIN = 'jumoreski'
-        TOKEN = "vk1.a.c7pdj0HD2M_K43snGEaNgobJyNPnaO6q2lEQzzFJSP_5jmDYe6MOloNcaB7C2vNDN-FtMKrGT13Fcom9eIdSltTMMVXRPVMQNXzn7mMz9zPwjfnF5Z-27_ezsJjIcVzfWss9dGSSVOTFNGMkbvTVILl7hx8XH4kSKjGowaaRYWNVkrCJnJzkAeq08JACiq11"
+        DOMAIN = 'itis_kfu'
+        TOKEN = "vk1.a.O59QXvUrsujZIksS2HiFacppu6vKFQnzgHSo8N-SGvHmggHntXjpI2xddWx56srAhOyCSU4XaTJmmqR0re48ZohDhTycUq5m1DHeoJAVArN1sSPliFB7A_5w_FS19fJYQHCgNk_TgdV5LEBYgON5q5UN_fZOaJhpXME4-QJ1cM2bASjPIcxAWqXDfzRUZMcB"
         take_2000_posts(TOKEN, DOMAIN)
 
     except Exception as e:
